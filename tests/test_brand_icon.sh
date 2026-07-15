@@ -3,7 +3,10 @@ set -eu
 
 test -f assets/brand/mugong-smart-sprout.svg
 test -f assets/brand/mugong-smart-sprout-512.png
+test -f assets/brand/mugong-smart-sprout-108.png
 test -f favicon.svg
+sips -g pixelWidth -g pixelHeight assets/brand/mugong-smart-sprout-108.png | grep -F 'pixelWidth: 108'
+sips -g pixelWidth -g pixelHeight assets/brand/mugong-smart-sprout-108.png | grep -F 'pixelHeight: 108'
 grep -F '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"' assets/brand/mugong-smart-sprout.svg
 grep -F '<linearGradient id="mugong-gradient" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="112" y2="112">' assets/brand/mugong-smart-sprout.svg
 grep -F '<stop offset="0%" stop-color="#667eea"' assets/brand/mugong-smart-sprout.svg
