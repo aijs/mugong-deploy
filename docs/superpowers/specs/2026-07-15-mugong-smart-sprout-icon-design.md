@@ -14,7 +14,7 @@
 ## 图形规格
 
 - 画布：`120 × 120`，`viewBox="0 0 120 120"`，四周保留至少 `8` 单位安全区。
-- 底板：`x=8`、`y=8`、`width=104`、`height=104`、`rx=30` 的圆角方形，使用从 `#667eea` 至 `#764ba2` 的左上至右下线性渐变。
+- 底板：`<rect x="8" y="8" width="104" height="104" rx="30" fill="url(#mugong-gradient)" />`。渐变定义固定为 `<linearGradient id="mugong-gradient" gradientUnits="userSpaceOnUse" x1="8" y1="8" x2="112" y2="112"><stop offset="0%" stop-color="#667eea"/><stop offset="100%" stop-color="#764ba2"/></linearGradient>`。
 - 枝干：使用单一路径 `M60 84V48 M60 52L38 74 M60 52L82 74`，`stroke="#ffffff"`、`stroke-width="12"`、`stroke-linecap="round"`、`stroke-linejoin="round"`、`fill="none"`。这是居中的白色抽象“木”形：竖干从 `(60,84)` 至 `(60,48)`，左右枝分别终止于 `(38,74)` 与 `(82,74)`。
 - 成长节点：`<circle cx="60" cy="32" r="8" fill="#bef264" stroke="#ffffff" stroke-width="4" />`；它位于枝干正上方，填充 `#bef264`，并以 `4` 单位白色描边隔开紫色底板。
 - SVG 仅使用路径、圆形、圆角和渐变，不嵌入文字、位图或外部资源；所有边缘均须在 `16px` favicon 尺寸下保留可辨识轮廓。
@@ -41,9 +41,10 @@
 ## 部署与端到端验证步骤
 
 1. 在 `main` 分支提交图标文件与 `index.html` 变更，记录 `commit_sha=$(git rev-parse HEAD)`，再执行 `git push origin main`；该推送触发 `Deploy to GitHub Pages`。
-2. 最多轮询 12 次、每次间隔 10 秒，请求 `https://api.github.com/repos/aijs/mugong-deploy/actions/runs?head_sha=$commit_sha&per_page=1`，直到找到本次提交对应的运行。验证其 `name` 为 `Deploy to GitHub Pages`，并继续轮询至 `status=completed`；要求 `conclusion=success`。
-3. 在工作流成功后，最多轮询 12 次、每次间隔 10 秒，使用 `curl --fail --location https://aijs.github.io/mugong-deploy/` 下载首页；仅当响应为 HTTP 200 且内容包含 `href="favicon.svg"` 与 `assets/brand/mugong-smart-sprout.svg` 时通过。
-4. 在同一轮询周期内，使用 `curl --fail --location https://aijs.github.io/mugong-deploy/favicon.svg` 验证 favicon 返回 HTTP 200，并包含根 `<svg` 元素。
+2. 最多轮询 12 次、每次间隔 10 秒，请求 `https://api.github.com/repos/aijs/mugong-deploy/actions/runs?head_sha=$commit_sha&per_page=1`，直到找到本次提交对应的运行。验证其 `name` 为 `Deploy to GitHub Pages`、`head_sha` 等于 `$commit_sha`，并继续轮询至 `status=completed`；要求 `conclusion=success`。
+3. 从该运行读取 `deploy` job 的日志；断言 checkout 输出的提交哈希为 `$commit_sha`，且 `Deploy to GitHub Pages` 步骤成功并报告 `https://aijs.github.io/mugong-deploy/`。这证明发布产物来自本次提交。
+4. 在工作流成功后，最多轮询 12 次、每次间隔 10 秒，使用 `curl --fail --location https://aijs.github.io/mugong-deploy/` 下载首页；仅当响应为 HTTP 200 且内容包含本次提交新增的 `href="favicon.svg"` 与 `assets/brand/mugong-smart-sprout.svg` 时通过。
+5. 在同一轮询周期内，使用 `curl --fail --location https://aijs.github.io/mugong-deploy/favicon.svg` 验证 favicon 返回 HTTP 200，并包含根 `<svg` 元素。
 
 ## 风险
 
